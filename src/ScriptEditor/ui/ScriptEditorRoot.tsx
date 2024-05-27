@@ -116,10 +116,10 @@ function Root(props: IProps): React.ReactElement {
     if (editorRef.current === null || currentScript === null) return;
     if (!decorations) decorations = editorRef.current.createDecorationsCollection();
     if (!currentScript.path.endsWith(".js")) return;
-    const awaitWarning = checkInfiniteLoop(newCode);
-    if (awaitWarning !== -1) {
-      decorations.set([
-        {
+    const possibleLines = checkInfiniteLoop(newCode);
+    if (possibleLines.length !== 0) {
+      decorations.set(
+        possibleLines.map((awaitWarning) => ({
           range: {
             startLineNumber: awaitWarning,
             startColumn: 1,
@@ -130,11 +130,12 @@ function Root(props: IProps): React.ReactElement {
             isWholeLine: true,
             glyphMarginClassName: "myGlyphMarginClass",
             glyphMarginHoverMessage: {
-              value: "Possible infinite loop, await something.",
+              value:
+                "Possible infinite loop, await something. If this is a false-positive, use `// @ignore-infinite` to suppress.",
             },
           },
-        },
-      ]);
+        })),
+      );
     } else decorations.clear();
   }
 
@@ -232,6 +233,11 @@ function Root(props: IProps): React.ReactElement {
 
   function onTabClick(index: number): void {
     if (currentScript !== null) {
+      // Save the current position of the cursor.
+      const currentPosition = editorRef.current?.getPosition();
+      if (currentPosition) {
+        currentScript.lastPosition = currentPosition;
+      }
       // Save currentScript to openScripts
       const curIndex = currentTabIndex();
       if (curIndex !== undefined) {
@@ -355,6 +361,17 @@ function Root(props: IProps): React.ReactElement {
     }
   }
 
+  function onUnmountEditor() {
+    if (!currentScript) {
+      return;
+    }
+    // Save the current position of the cursor.
+    const currentPosition = editorRef.current?.getPosition();
+    if (currentPosition) {
+      currentScript.lastPosition = currentPosition;
+    }
+  }
+
   const { VimStatus } = useVimEditor({
     editor: editorRef.current,
     vim: options.vim,
@@ -391,7 +408,7 @@ function Root(props: IProps): React.ReactElement {
           onTabUpdate={onTabUpdate}
         />
         <div style={{ flex: "0 0 5px" }} />
-        <Editor onMount={onMount} onChange={updateCode} />
+        <Editor onMount={onMount} onChange={updateCode} onUnmount={onUnmountEditor} />
 
         {VimStatus}
 

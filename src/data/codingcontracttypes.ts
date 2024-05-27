@@ -1,5 +1,4 @@
 import { getRandomIntInclusive } from "../utils/helpers/getRandomIntInclusive";
-import { MinHeap } from "../utils/Heap";
 
 import { comprGenChar, comprLZGenerate, comprLZEncode, comprLZDecode } from "../utils/CompressionContracts";
 import { HammingEncode, HammingDecode, HammingEncodeProperly } from "../utils/HammingCodeTools";
@@ -994,7 +993,7 @@ export const codingContractTypesMetadata: ICodingContractTypeMetadata[] = [
 
       const distance: [number][] = new Array(height);
       //const prev: [[number, number] | undefined][] = new Array(height);
-      const queue = new MinHeap<[number, number]>();
+      const queue: [number, number][] = [];
 
       for (let y = 0; y < height; y++) {
         distance[y] = new Array(width).fill(Infinity) as [number];
@@ -1015,21 +1014,15 @@ export const codingContractTypesMetadata: ICodingContractTypeMetadata[] = [
 
       // Prepare starting point
       distance[0][0] = 0;
-      queue.push([0, 0], 0);
+      queue.push([0, 0]);
 
       // Take next-nearest position and expand potential paths from there
-      while (queue.size > 0) {
-        const [y, x] = queue.pop() as [number, number];
+      while (queue.length > 0) {
+        const [y, x] = queue.shift() as [number, number];
         for (const [yN, xN] of neighbors(y, x)) {
-          const d = distance[y][x] + 1;
-          if (d < distance[yN][xN]) {
-            if (distance[yN][xN] == Infinity)
-              // Not reached previously
-              queue.push([yN, xN], d);
-            // Found a shorter path
-            else queue.changeWeight(([yQ, xQ]) => yQ == yN && xQ == xN, d);
-            //prev[yN][xN] = [y, x];
-            distance[yN][xN] = d;
+          if (distance[yN][xN] == Infinity) {
+            queue.push([yN, xN]);
+            distance[yN][xN] = distance[y][x] + 1;
           }
         }
       }
@@ -1282,8 +1275,9 @@ export const codingContractTypesMetadata: ICodingContractTypeMetadata[] = [
       // Prevent player from providing extra wrong answers and still receiving credit
       if (result.length !== sanitizedPlayerAnsArr.length) return false;
 
-      for (const expr of result) {
-        if (!sanitizedPlayerAnsArr.includes(expr)) {
+      const resultsSet = new Set(result);
+      for (const expr of sanitizedPlayerAnsArr) {
+        if (!resultsSet.has(expr)) {
           return false;
         }
       }
@@ -1334,6 +1328,7 @@ export const codingContractTypesMetadata: ICodingContractTypeMetadata[] = [
         "You are given the following encoded binary string: \n",
         `'${n}' \n\n`,
         "Decode it as an 'extended Hamming code' and convert it to a decimal value.\n",
+        "The binary string may include leading zeroes.\n",
         "Parity bits are inserted at positions 0 and 2^N.\n",
         "Parity bits are used to make the total number of '1' bits in a given set of data even.\n",
         "The parity bit at position 0 considers all bits including parity bits.\n",
