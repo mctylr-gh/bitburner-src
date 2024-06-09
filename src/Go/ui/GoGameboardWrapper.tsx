@@ -9,7 +9,7 @@ import { SnackbarEvents } from "../../ui/React/Snackbar";
 import { getNewBoardState, getStateCopy, makeMove, passTurn, updateCaptures } from "../boardState/boardState";
 import { bitverseArt, weiArt } from "../boardState/asciiArt";
 import { getScore, resetWinstreak } from "../boardAnalysis/scoring";
-import { boardFromSimpleBoard, evaluateIfMoveIsValid, getAllValidMoves } from "../boardAnalysis/boardAnalysis";
+import { boardFromBoardString, evaluateIfMoveIsValid, getAllValidMoves } from "../boardAnalysis/boardAnalysis";
 import { useRerender } from "../../ui/React/hooks";
 import { OptionSwitch } from "../../ui/React/OptionSwitch";
 import { boardStyles } from "../boardState/goStyles";
@@ -46,7 +46,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
   const [scoreOpen, setScoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const classes = boardStyles();
+  const { classes } = boardStyles();
   const boardSize = boardState.board[0].length;
   const currentPlayer = boardState.previousPlayer === GoColor.white ? GoColor.black : GoColor.white;
   const waitingOnAI = boardState.previousPlayer === GoColor.black && boardState.ai !== GoOpponent.none;
@@ -115,7 +115,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
       return;
     }
 
-    const move = await makeAIMove(boardState);
+    const move = await makeAIMove(boardState, false);
 
     if (move.type === GoPlayType.pass) {
       SnackbarEvents.emit(`The opponent passes their turn; It is now your turn to move.`, ToastVariant.WARNING, 4000);
@@ -150,7 +150,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
     if (!boardState.previousBoards.length) return boardState;
     const priorState = getStateCopy(boardState);
     priorState.previousPlayer = boardState.previousPlayer === GoColor.black ? GoColor.white : GoColor.black;
-    priorState.board = boardFromSimpleBoard(boardState.previousBoards[0]);
+    priorState.board = boardFromBoardString(boardState.previousBoards[0]);
     updateCaptures(priorState.board, priorState.previousPlayer);
     return priorState;
   }
