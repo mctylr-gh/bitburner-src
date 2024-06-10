@@ -3132,7 +3132,7 @@ export interface Bladeburner {
    * @param level - Optional number. Action level at which to calculate the gain. Will be the action's current level if not given.
    * @returns Average Bladeburner reputation gain for successfully completing the specified action.
    */
-  getActionRepGain(type: string, name: string, level: number): number;
+  getActionRepGain(type: string, name: string, level?: number): number;
 
   /**
    * Get action count remaining.
@@ -3321,7 +3321,9 @@ export interface Bladeburner {
    * @remarks
    * RAM cost: 4 GB
    *
-   * Returns the number of Bladeburner team members you have assigned to the specified action.
+   * Returns the number of available Bladeburner team members.
+   * You can also pass the type and name of an action to get the number of
+   * Bladeburner team members you have assigned to the specified action.
    *
    * Setting a team is only applicable for Operations and BlackOps. This function will return 0 for other action types.
    *
@@ -3329,7 +3331,7 @@ export interface Bladeburner {
    * @param name - Name of action. Must be an exact match.
    * @returns Number of Bladeburner team members that were assigned to the specified action.
    */
-  getTeamSize(type: string, name: string): number;
+  getTeamSize(type?: string, name?: string): number;
 
   /**
    * Set team size.
