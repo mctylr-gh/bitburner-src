@@ -140,6 +140,7 @@ module.exports = (env, argv) => {
         {
           test: /\.(js$|jsx|ts|tsx)$/,
           exclude: /node_modules/,
+          resourceQuery: { not: /raw/ },
           use: {
             loader: "babel-loader",
             options: {
@@ -152,6 +153,10 @@ module.exports = (env, argv) => {
         {
           test: /\.s?css$/,
           use: ["style-loader", "css-loader"],
+        },
+        {
+          resourceQuery: /raw/,
+          type: "asset/source",
         },
       ],
     },
@@ -187,5 +192,11 @@ module.exports = (env, argv) => {
       fallback: { crypto: false },
     },
     stats: statsConfig,
+    ignoreWarnings: [
+      {
+        module: /@babel\/standalone/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ],
   };
 };

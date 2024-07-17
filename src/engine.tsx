@@ -8,7 +8,6 @@ import { Factions } from "./Faction/Factions";
 import { staneksGift } from "./CotMG/Helper";
 import { processPassiveFactionRepGain, inviteToFaction } from "./Faction/FactionHelpers";
 import { Router } from "./ui/GameRoot";
-import { Page } from "./ui/Router";
 import "./utils/Protections"; // Side-effect: Protect against certain unrecoverable errors
 import "./PersonObjects/Player/PlayerObject"; // For side-effect of creating Player
 
@@ -46,8 +45,13 @@ import { SnackbarEvents } from "./ui/React/Snackbar";
 import { SaveData } from "./types";
 import { Go } from "./Go/Go";
 
-function showWarningAboutSystemClock() {
-  AlertEvents.emit("Warning: The system clock moved backward.");
+// Only show warning if the time diff is greater than this value.
+const thresholdOfTimeDiffForShowingWarningAboutSystemClock = CONSTANTS.MillisecondsPerFiveMinutes;
+
+function showWarningAboutSystemClock(timeDiff: number) {
+  AlertEvents.emit(
+    `Warning: The system clock moved backward: ${convertTimeMsToTimeElapsedString(Math.abs(timeDiff))}.`,
+  );
 }
 
 /** Game engine. Handles the main game loop. */
@@ -253,10 +257,13 @@ const Engine: {
       const lastUpdate = Player.lastUpdate;
       let timeOffline = Engine._lastUpdate - lastUpdate;
       if (timeOffline < 0) {
+        if (Math.abs(timeOffline) > thresholdOfTimeDiffForShowingWarningAboutSystemClock) {
+          const timeDiff = timeOffline;
+          setTimeout(() => {
+            showWarningAboutSystemClock(timeDiff);
+          }, 250);
+        }
         timeOffline = 0;
-        setTimeout(() => {
-          showWarningAboutSystemClock();
-        }, 250);
       }
       const numCyclesOffline = Math.floor(timeOffline / CONSTANTS.MilliPerCycle);
 
@@ -404,10 +411,12 @@ const Engine: {
     const _thisUpdate = new Date().getTime();
     let diff = _thisUpdate - Engine._lastUpdate;
     if (diff < 0) {
+      if (Math.abs(diff) > thresholdOfTimeDiffForShowingWarningAboutSystemClock) {
+        showWarningAboutSystemClock(diff);
+      }
       diff = 0;
       Engine._lastUpdate = _thisUpdate;
       Player.lastUpdate = _thisUpdate;
-      showWarningAboutSystemClock();
     }
     const offset = diff % CONSTANTS.MilliPerCycle;
 
@@ -431,8 +440,7 @@ function warnAutosaveDisabled(): void {
 
   // We don't want this warning to show up on certain pages.
   // When in recovery or importing we want to keep autosave disabled.
-  const ignoredPages = [Page.Recovery as Page, Page.ImportSave];
-  if (ignoredPages.includes(Router.page())) return;
+  if (Router.hidingMessages()) return;
 
   const warningToast = (
     <>

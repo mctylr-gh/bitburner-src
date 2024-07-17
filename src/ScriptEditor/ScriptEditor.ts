@@ -3,7 +3,12 @@ import type { ContentFilePath } from "../Paths/ContentFile";
 import { EventEmitter } from "../utils/EventEmitter";
 import * as monaco from "monaco-editor";
 import { loadThemes, makeTheme, sanitizeTheme } from "./ui/themes";
-import libSource from "!!raw-loader!./NetscriptDefinitions.d.ts";
+import netscriptDefinitions from "./NetscriptDefinitions.d.ts?raw";
+// We use a relative paths here to
+// - bypass the exports in @types/react's package.json
+// - to prevent typescript from complaining about importing a delcaration file.
+import reactTypes from "../../node_modules/@types/react/index.d.ts?raw";
+import reactDomTypes from "../../node_modules/@types/react-dom/index.d.ts?raw";
 import { Settings } from "../Settings/Settings";
 import { NetscriptExtra } from "../NetscriptFunctions/Extra";
 import * as enums from "../Enums";
@@ -57,9 +62,27 @@ export class ScriptEditor {
     })();
 
     // Add ts definitions for API
-    const source = (libSource + "").replace(/export /g, "");
-    monaco.languages.typescript.javascriptDefaults.addExtraLib(source, "netscript.d.ts");
-    monaco.languages.typescript.typescriptDefaults.addExtraLib(source, "netscript.d.ts");
+    const source = netscriptDefinitions.replace(/export /g, "");
+    for (const languageDefaults of [
+      monaco.languages.typescript.javascriptDefaults,
+      monaco.languages.typescript.typescriptDefaults,
+    ]) {
+      languageDefaults.addExtraLib(source, "netscript.d.ts");
+      languageDefaults.addExtraLib(reactTypes, "react.d.ts");
+      languageDefaults.addExtraLib(reactDomTypes, "react-dom.d.ts");
+    }
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
+      jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+      allowUmdGlobalAccess: true,
+    });
+    /**
+     * Ignore these errors in the editor:
+     * - Cannot find module ''. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?(2792)
+     */
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      diagnosticCodesToIgnore: [2792],
+    });
     monaco.languages.json.jsonDefaults.setModeConfiguration({
       ...monaco.languages.json.jsonDefaults.modeConfiguration,
       //completion should be disabled because the
