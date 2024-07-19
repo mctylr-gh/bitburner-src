@@ -5,7 +5,9 @@ const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
+/** @type import("webpack-cli").CallableOption} */
 module.exports = (env, argv) => {
   const isDevServer = (env || {}).devServer === true;
   const runInContainer = (env || {}).runInContainer === true;
@@ -29,7 +31,6 @@ module.exports = (env, argv) => {
     hot: true,
     port: 8000,
     devMiddleware: {
-      publicPath: `/`,
       stats: statsConfig,
     },
     static: {
@@ -127,6 +128,15 @@ module.exports = (env, argv) => {
           module: true,
         }),
       enableReactRefresh && new ReactRefreshWebpackPlugin(),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: "{tex-chtml.js,*/**/*}",
+            to: "mathjax",
+            context: "node_modules/mathjax-full/es5",
+          },
+        ],
+      }),
     ].filter(Boolean),
     target: "web",
     entry: entry,
