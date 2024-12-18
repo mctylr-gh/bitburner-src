@@ -1,15 +1,7 @@
-import type { Singularity as ISingularity, Task as ITask } from "@nsdefs";
+import type { Singularity as ISingularity } from "@nsdefs";
 
 import { Player } from "@player";
-import {
-  AugmentationName,
-  CityName,
-  FactionName,
-  FactionWorkType,
-  GymType,
-  LocationName,
-  UniversityClassType,
-} from "@enums";
+import { AugmentationName, CityName, FactionWorkType, GymType, LocationName, UniversityClassType } from "@enums";
 import { purchaseAugmentation, joinFaction, getFactionAugmentationsFiltered } from "../Faction/FactionHelpers";
 import { startWorkerScript } from "../NetscriptWorker";
 import { Augmentations } from "../Augmentation/Augmentations";
@@ -96,7 +88,13 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
       }
       return res;
     },
-    getOwnedSourceFiles: () => () => [...Player.sourceFiles].map(([n, lvl]) => ({ n, lvl })),
+    getOwnedSourceFiles: () => () => {
+      return [...Player.activeSourceFiles]
+        .filter(([__, activeLevel]) => {
+          return activeLevel > 0;
+        })
+        .map(([n, lvl]) => ({ n, lvl }));
+    },
     getAugmentationFactions: (ctx) => (_augName) => {
       helpers.checkSingularityAccess(ctx);
       const augName = getEnumHelper("AugmentationName").nsGetMember(ctx, _augName);
@@ -559,14 +557,13 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
       helpers.checkSingularityAccess(ctx);
       const baseserver = Player.getCurrentServer();
       if (!(baseserver instanceof Server)) {
-        helpers.log(ctx, () => "cannot backdoor this kind of server");
-        return Promise.resolve();
+        throw helpers.errorMessage(ctx, "Cannot backdoor this kind of server.");
       }
       const server = baseserver;
       const installTime = (calculateHackingTime(server, Player) / 4) * 1000;
 
       // No root access or skill level too low
-      const canHack = netscriptCanHack(server);
+      const canHack = netscriptCanHack(server, "backdoor");
       if (!canHack.res) {
         throw helpers.errorMessage(ctx, canHack.msg || "");
       }
@@ -968,8 +965,8 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
         helpers.log(ctx, () => `You can't donate to '${facName}' because you are managing a gang for it`);
         return false;
       }
-      if (faction.name === FactionName.ChurchOfTheMachineGod || faction.name === FactionName.Bladeburners) {
-        helpers.log(ctx, () => `You can't donate to '${facName}' because they do not accept donations`);
+      if (!faction.getInfo().offersWork()) {
+        helpers.log(ctx, () => `You can't donate to '${facName}' because this faction does not offer any type of work`);
         return false;
       }
       if (typeof amt !== "number" || amt <= 0 || isNaN(amt)) {
@@ -1151,7 +1148,7 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
         ? resolveScriptFilePath(helpers.string(ctx, "cbScript", _cbScript), ctx.workerScript.name)
         : false;
       if (cbScript === null) {
-        throw helpers.errorMessage(ctx, `Could not resolve file path: ${_cbScript}`);
+        throw helpers.errorMessage(ctx, `Could not resolve file path. callbackScript is null.`);
       }
       enterBitNode(true, Player.bitNodeN, nextBN, helpers.validateBitNodeOptions(ctx, _bitNodeOptions));
       if (cbScript) {
@@ -1168,7 +1165,7 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
         ? resolveScriptFilePath(helpers.string(ctx, "cbScript", _cbScript), ctx.workerScript.name)
         : false;
       if (cbScript === null) {
-        throw helpers.errorMessage(ctx, `Could not resolve file path: ${_cbScript}`);
+        throw helpers.errorMessage(ctx, `Could not resolve file path. callbackScript is null.`);
       }
 
       const wd = GetServer(SpecialServers.WorldDaemon);
@@ -1203,7 +1200,7 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
     getCurrentWork: (ctx) => () => {
       helpers.checkSingularityAccess(ctx);
       if (!Player.currentWork) return null;
-      return Player.currentWork.APICopy() as ITask;
+      return Player.currentWork.APICopy();
     },
     exportGame: (ctx) => () => {
       helpers.checkSingularityAccess(ctx);

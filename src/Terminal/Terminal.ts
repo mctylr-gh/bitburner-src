@@ -73,9 +73,10 @@ import { unalias } from "./commands/unalias";
 import { vim } from "./commands/vim";
 import { weaken } from "./commands/weaken";
 import { wget } from "./commands/wget";
-import { hash } from "../hash/hash";
+import { commitHash } from "../utils/helpers/commitHash";
 import { apr1 } from "./commands/apr1";
 import { changelog } from "./commands/changelog";
+import { clear } from "./commands/clear";
 import { currentNodeMults } from "../BitNode/BitNodeMultipliers";
 import { Engine } from "../engine";
 import { Directory, resolveDirectory, root } from "../Paths/Directory";
@@ -83,6 +84,52 @@ import { FilePath, isFilePath, resolveFilePath } from "../Paths/FilePath";
 import { hasTextExtension } from "../Paths/TextFilePath";
 import { ContractFilePath } from "../Paths/ContractFilePath";
 import { ServerConstants } from "../Server/data/Constants";
+
+export const TerminalCommands: Record<string, (args: (string | number | boolean)[], server: BaseServer) => void> = {
+  "scan-analyze": scananalyze,
+  alias: alias,
+  analyze: analyze,
+  backdoor: backdoor,
+  buy: buy,
+  cat: cat,
+  cd: cd,
+  changelog: changelog,
+  check: check,
+  clear: clear,
+  cls: clear,
+  connect: connect,
+  cp: cp,
+  download: download,
+  expr: expr,
+  free: free,
+  grep: grep,
+  grow: grow,
+  hack: hack,
+  help: help,
+  history: history,
+  home: home,
+  hostname: hostname,
+  kill: kill,
+  killall: killall,
+  ls: ls,
+  lscpu: lscpu,
+  mem: mem,
+  mv: mv,
+  nano: nano,
+  ps: ps,
+  rm: rm,
+  run: run,
+  scan: scan,
+  scp: scp,
+  sudov: sudov,
+  tail: tail,
+  apr1: apr1,
+  top: top,
+  unalias: unalias,
+  vim: vim,
+  weaken: weaken,
+  wget: wget,
+};
 
 export class Terminal {
   // Flags to determine whether the player is currently running a hack or an analyze
@@ -92,7 +139,7 @@ export class Terminal {
   commandHistoryIndex = 0;
 
   outputHistory: (Output | Link | RawOutput)[] = [
-    new Output(`Bitburner v${CONSTANTS.VersionString} (${hash()})`, "primary"),
+    new Output(`Bitburner v${CONSTANTS.VersionString} (${commitHash()})`, "primary"),
   ];
 
   // True if a Coding Contract prompt is opened
@@ -566,7 +613,7 @@ export class Terminal {
   }
 
   clear(): void {
-    this.outputHistory = [new Output(`Bitburner v${CONSTANTS.VersionString} (${hash()})`, "primary")];
+    this.outputHistory = [new Output(`Bitburner v${CONSTANTS.VersionString} (${commitHash()})`, "primary")];
     TerminalEvents.emit();
     TerminalClearEvents.emit();
   }
@@ -589,12 +636,14 @@ export class Terminal {
       if (n00dlesServ == null) {
         throw new Error("Could not get n00dles server");
       }
+      const errorMessageForBadCommand =
+        "Bad command. Please follow the tutorial or click 'Exit Tutorial' if you'd like to skip it.";
       switch (ITutorial.currStep) {
         case iTutorialSteps.TerminalHelp:
           if (commandArray.length === 1 && commandArray[0] == "help") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -602,7 +651,7 @@ export class Terminal {
           if (commandArray.length === 1 && commandArray[0] == "ls") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -610,7 +659,7 @@ export class Terminal {
           if (commandArray.length === 1 && commandArray[0] == "scan") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -618,7 +667,7 @@ export class Terminal {
           if (commandArray.length == 1 && commandArray[0] == "scan-analyze") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -626,7 +675,7 @@ export class Terminal {
           if (commandArray.length == 2 && commandArray[0] == "scan-analyze" && commandArray[1] === 2) {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -642,7 +691,7 @@ export class Terminal {
               return;
             }
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -650,7 +699,7 @@ export class Terminal {
           if (commandArray.length === 1 && commandArray[0] === "analyze") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -658,7 +707,7 @@ export class Terminal {
           if (commandArray.length == 2 && commandArray[0] == "run" && commandArray[1] == "NUKE.exe") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -666,13 +715,13 @@ export class Terminal {
           if (commandArray.length == 1 && commandArray[0] == "hack") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
         case iTutorialSteps.TerminalHackingMechanics:
           if (commandArray.length !== 1 || !["grow", "weaken", "hack"].includes(commandArray[0] + "")) {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -680,7 +729,7 @@ export class Terminal {
           if (commandArray.length == 1 && commandArray[0] == "home") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -692,7 +741,7 @@ export class Terminal {
           ) {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -700,7 +749,7 @@ export class Terminal {
           if (commandArray.length == 1 && commandArray[0] == "free") {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -712,7 +761,7 @@ export class Terminal {
           ) {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
@@ -724,12 +773,12 @@ export class Terminal {
           ) {
             iTutorialNextStep();
           } else {
-            this.error("Bad command. Please follow the tutorial");
+            this.error(errorMessageForBadCommand);
             return;
           }
           break;
         default:
-          this.error("Please follow the tutorial, or click 'EXIT' if you'd like to skip it");
+          this.error("Please follow the tutorial or click 'Exit Tutorial' if you'd like to skip it");
           return;
       }
     }
@@ -744,53 +793,7 @@ export class Terminal {
     // Aside from the run-by-path command, we don't need the first entry once we've stored it in commandName.
     commandArray.shift();
 
-    const commands: Record<string, (args: (string | number | boolean)[], server: BaseServer) => void> = {
-      "scan-analyze": scananalyze,
-      alias: alias,
-      analyze: analyze,
-      backdoor: backdoor,
-      buy: buy,
-      cat: cat,
-      cd: cd,
-      changelog: changelog,
-      check: check,
-      clear: () => this.clear(),
-      cls: () => this.clear(),
-      connect: connect,
-      cp: cp,
-      download: download,
-      expr: expr,
-      free: free,
-      grep: grep,
-      grow: grow,
-      hack: hack,
-      help: help,
-      history: history,
-      home: home,
-      hostname: hostname,
-      kill: kill,
-      killall: killall,
-      ls: ls,
-      lscpu: lscpu,
-      mem: mem,
-      mv: mv,
-      nano: nano,
-      ps: ps,
-      rm: rm,
-      run: run,
-      scan: scan,
-      scp: scp,
-      sudov: sudov,
-      tail: tail,
-      apr1: apr1,
-      top: top,
-      unalias: unalias,
-      vim: vim,
-      weaken: weaken,
-      wget: wget,
-    };
-
-    const f = commands[commandName.toLowerCase()];
+    const f = TerminalCommands[commandName.toLowerCase()];
     if (!f) return this.error(`Command ${commandName} not found`);
 
     f(commandArray, currentServer);

@@ -19,15 +19,16 @@ import * as workMethods from "./PlayerObjectWorkMethods";
 import { setPlayer } from "@player";
 import { CompanyName, FactionName, JobName, LocationName } from "@enums";
 import { HashManager } from "../../Hacknet/HashManager";
-import { MoneySourceTracker } from "../../utils/MoneySourceTracker";
+import { type MoneySource, MoneySourceTracker } from "../../utils/MoneySourceTracker";
 import { constructorsForReviver, Generic_toJSON, Generic_fromJSON, IReviverValue } from "../../utils/JSONReviver";
 import { JSONMap, JSONSet } from "../../Types/Jsonable";
-import { cyrb53 } from "../../utils/StringHelperFunctions";
+import { cyrb53 } from "../../utils/HashUtils";
 import { getRandomIntInclusive } from "../../utils/helpers/getRandomIntInclusive";
 import { CONSTANTS } from "../../Constants";
 import { Person } from "../Person";
 import { isMember } from "../../utils/EnumHelper";
 import { PartialRecord } from "../../Types/Record";
+import { isSleeveSupportWork } from "../Sleeve/Work/SleeveSupportWork";
 
 export class PlayerObject extends Person implements IPlayer {
   // Player-specific properties
@@ -163,8 +164,16 @@ export class PlayerObject extends Person implements IPlayer {
     this.lastAugReset = this.lastNodeReset = Date.now();
   }
 
+  travelCostMoneySource(): MoneySource {
+    return "other";
+  }
+
   whoAmI(): string {
     return "Player";
+  }
+
+  sleevesSupportingBladeburner(): Sleeve[] {
+    return this.sleeves.filter((s) => isSleeveSupportWork(s.currentWork));
   }
 
   /** Serialize the current object to a JSON save state. */
@@ -194,6 +203,7 @@ export class PlayerObject extends Person implements IPlayer {
     // Remove any invalid jobs
     for (const [loadedCompanyName, loadedJobName] of Object.entries(player.jobs)) {
       if (!isMember("CompanyName", loadedCompanyName) || !isMember("JobName", loadedJobName)) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete player.jobs[loadedCompanyName as CompanyName];
       }
     }

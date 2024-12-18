@@ -48,6 +48,9 @@ function setInitialExpForPlayer() {
 
 // Prestige by purchasing augmentation
 export function prestigeAugmentation(): void {
+  // We must kill all scripts before doing anything else.
+  prestigeWorkerScripts();
+
   initBitNodeMultipliers();
 
   // Maintain invites to factions with the 'keepOnInstall' flag, and rumors about others
@@ -64,9 +67,6 @@ export function prestigeAugmentation(): void {
   Player.prestigeAugmentation();
   Go.prestigeAugmentation();
 
-  // Delete all Worker Scripts objects
-  prestigeWorkerScripts();
-
   const homeComp = Player.getHomeComputer();
   // Delete all servers except home computer
   prestigeAllServers();
@@ -80,11 +80,11 @@ export function prestigeAugmentation(): void {
     const aug = Augmentations[ownedAug.name];
     Player.gainMoney(aug.startingMoney, "other");
     for (const program of aug.programs) {
-      homeComp.programs.push(program);
+      homeComp.pushProgram(program);
     }
   }
   if (canAccessBitNodeFeature(5)) {
-    homeComp.programs.push(CompletedProgramName.formulas);
+    homeComp.pushProgram(CompletedProgramName.formulas);
   }
 
   // Re-create foreign servers
@@ -188,12 +188,13 @@ export function prestigeAugmentation(): void {
 
 // Prestige by destroying Bit Node and gaining a Source File
 export function prestigeSourceFile(isFlume: boolean): void {
+  // We must kill all scripts before doing anything else.
+  prestigeWorkerScripts();
+
   initBitNodeMultipliers();
 
   Player.prestigeSourceFile();
   Go.prestigeSourceFile();
-
-  prestigeWorkerScripts(); // Delete all Worker Scripts objects
 
   const homeComp = Player.getHomeComputer();
 
@@ -248,7 +249,7 @@ export function prestigeSourceFile(isFlume: boolean): void {
   Player.reapplyAllSourceFiles();
 
   if (canAccessBitNodeFeature(5)) {
-    homeComp.programs.push(CompletedProgramName.formulas);
+    homeComp.pushProgram(CompletedProgramName.formulas);
   }
 
   // BitNode 3: Corporatocracy
@@ -256,8 +257,9 @@ export function prestigeSourceFile(isFlume: boolean): void {
     // Easiest way to comply with type constraint, instead of revalidating the enum member's file path
     homeComp.messages.push(LiteratureName.CorporationManagementHandbook);
     delayedDialog(
-      "You received a copy of the Corporation Management Handbook on your home computer. " +
-        "Read it if you need help getting started with Corporations!",
+      "You received a copy of the Corporation Management Handbook on your home computer. It's a short introduction for " +
+        "managing Corporation.\n\nYou should check the in-game Corporation documentation in the Documentation tab " +
+        "(Documentation -> Advanced Mechanics -> Corporation). It's the most useful and up-to-date resource for managing Corporation.",
     );
   }
 
@@ -329,4 +331,10 @@ export function prestigeSourceFile(isFlume: boolean): void {
   resetPidCounter();
 
   setInitialExpForPlayer();
+
+  if (!isFlume && Player.sourceFiles.size === 1 && Player.sourceFileLvl(1) === 1) {
+    delayedDialog(
+      "Congratulations on destroying your first BitNode! Make sure to check the Documentation tab. Many pages are unlocked now.",
+    );
+  }
 }

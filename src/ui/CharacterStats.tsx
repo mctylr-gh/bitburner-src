@@ -15,7 +15,7 @@ import { Modal } from "./React/Modal";
 import { Money } from "./React/Money";
 import { StatsRow } from "./React/StatsRow";
 import { StatsTable } from "./React/StatsTable";
-import { useRerender } from "./React/hooks";
+import { useCycleRerender } from "./React/hooks";
 import { getMaxFavor } from "../Go/effects/effect";
 import { canAccessBitNodeFeature, knowAboutBitverse } from "../BitNode/BitNodeUtils";
 
@@ -109,7 +109,9 @@ function CurrentBitNode(): React.ReactElement {
         <Typography variant="h5">
           BitNode {Player.bitNodeN}: {BitNodes[index].name} (Level {lvl})
         </Typography>
-        <Typography sx={{ whiteSpace: "pre-wrap", overflowWrap: "break-word" }}>{BitNodes[index].info}</Typography>
+        <Typography component="div" sx={{ whiteSpace: "pre-wrap", overflowWrap: "break-word" }}>
+          {BitNodes[index].info}
+        </Typography>
       </Paper>
     );
   }
@@ -220,7 +222,7 @@ function MoneyModal({ open, onClose }: IMoneyModalProps): React.ReactElement {
 export function CharacterStats(): React.ReactElement {
   const [moneyOpen, setMoneyOpen] = useState(false);
   const [employersOpen, setEmployersOpen] = useState(false);
-  useRerender(200);
+  useCycleRerender();
 
   const timeRows = [
     ["Since last Augmentation installation", convertTimeMsToTimeElapsedString(Player.playtimeSinceLastAug)],

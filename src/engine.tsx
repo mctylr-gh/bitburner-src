@@ -2,7 +2,7 @@ import { convertTimeMsToTimeElapsedString } from "./utils/StringHelperFunctions"
 import { AugmentationName, ToastVariant } from "@enums";
 import { initBitNodeMultipliers } from "./BitNode/BitNode";
 import { initSourceFiles } from "./SourceFile/SourceFiles";
-import { generateRandomContract } from "./CodingContractGenerator";
+import { tryGeneratingRandomContract } from "./CodingContractGenerator";
 import { CONSTANTS } from "./Constants";
 import { Factions } from "./Faction/Factions";
 import { staneksGift } from "./CotMG/Helper";
@@ -22,7 +22,7 @@ import { checkForMessagesToSend } from "./Message/MessageHelpers";
 import { loadAllRunningScripts, updateOnlineScriptTimes } from "./NetscriptWorker";
 import { Player } from "@player";
 import { saveObject, loadGame } from "./SaveObject";
-import { initForeignServers } from "./Server/AllServers";
+import { GetAllServers, initForeignServers } from "./Server/AllServers";
 import { Settings } from "./Settings/Settings";
 import { FormatsNeedToChange } from "./ui/formatNumber";
 import { initSymbolToStockMap, processStockPrices } from "./StockMarket/StockMarket";
@@ -39,20 +39,31 @@ import { startExploits } from "./Exploits/loops";
 import { calculateAchievements } from "./Achievements/Achievements";
 
 import React from "react";
+import ReactDOM from "react-dom";
 import { setupUncaughtPromiseHandler } from "./UncaughtPromiseHandler";
 import { Button, Typography } from "@mui/material";
 import { SnackbarEvents } from "./ui/React/Snackbar";
 import { SaveData } from "./types";
 import { Go } from "./Go/Go";
+import { EventEmitter } from "./utils/EventEmitter";
+import { Companies } from "./Company/Companies";
 
-// Only show warning if the time diff is greater than this value.
-const thresholdOfTimeDiffForShowingWarningAboutSystemClock = CONSTANTS.MillisecondsPerFiveMinutes;
-
-function showWarningAboutSystemClock(timeDiff: number) {
-  AlertEvents.emit(
-    `Warning: The system clock moved backward: ${convertTimeMsToTimeElapsedString(Math.abs(timeDiff))}.`,
-  );
+declare global {
+  // This property is only available in the dev build
+  // eslint-disable-next-line no-var
+  var Bitburner: {
+    Player: typeof Player;
+    GetAllServers: typeof GetAllServers;
+    Factions: typeof Factions;
+    Companies: typeof Companies;
+    SaveObject: {
+      saveObject: typeof saveObject;
+      loadGame: typeof loadGame;
+    };
+  };
 }
+
+export const GameCycleEvents = new EventEmitter<[]>();
 
 /** Game engine. Handles the main game loop. */
 const Engine: {
@@ -108,7 +119,7 @@ const Engine: {
     // Gang
     if (Player.gang) Player.gang.process(numCycles);
 
-    // Staneks gift
+    // Stanek's gift
     staneksGift.process(numCycles);
 
     // Corporation
@@ -159,7 +170,10 @@ const Engine: {
 
   decrementAllCounters: function (numCycles = 1) {
     for (const [counterName, counter] of Object.entries(Engine.Counters)) {
-      if (counter === undefined) throw new Error("counter should not be undefined");
+      if (counter === undefined) {
+        exceptionAlert(new Error(`counter value is undefined. counterName: ${counterName}.`), true);
+        continue;
+      }
       Engine.Counters[counterName] = counter - numCycles;
     }
   },
@@ -196,17 +210,14 @@ const Engine: {
         try {
           Player.bladeburner.process();
         } catch (e) {
-          exceptionAlert("Exception caught in Bladeburner.process(): " + e);
+          exceptionAlert(e, true);
         }
       }
       Engine.Counters.mechanicProcess = 5;
     }
 
     if (Engine.Counters.contractGeneration <= 0) {
-      // X% chance of a contract being generated
-      if (Math.random() <= 0.25) {
-        generateRandomContract();
-      }
+      tryGeneratingRandomContract(1);
       Engine.Counters.contractGeneration = 3000;
     }
 
@@ -229,7 +240,7 @@ const Engine: {
         Engine.Counters.autoSaveCounter = 60 * 5; // Let's check back in a bit
       } else {
         Engine.Counters.autoSaveCounter = Settings.AutosaveInterval * 5;
-        saveObject.saveGame(!Settings.SuppressSavedGameToast);
+        saveObject.saveGame(!Settings.SuppressSavedGameToast).catch((error) => console.error(error));
       }
     }
   },
@@ -257,34 +268,12 @@ const Engine: {
       const lastUpdate = Player.lastUpdate;
       let timeOffline = Engine._lastUpdate - lastUpdate;
       if (timeOffline < 0) {
-        if (Math.abs(timeOffline) > thresholdOfTimeDiffForShowingWarningAboutSystemClock) {
-          const timeDiff = timeOffline;
-          setTimeout(() => {
-            showWarningAboutSystemClock(timeDiff);
-          }, 250);
-        }
         timeOffline = 0;
       }
       const numCyclesOffline = Math.floor(timeOffline / CONSTANTS.MilliPerCycle);
 
-      // Calculate the number of chances for a contract the player had whilst offline
-      const contractChancesWhileOffline = Math.floor(timeOffline / (1000 * 60 * 10));
-
-      // Generate coding contracts
-      let numContracts = 0;
-      if (contractChancesWhileOffline > 100) {
-        numContracts += Math.floor(contractChancesWhileOffline * 0.25);
-      }
-      if (contractChancesWhileOffline > 0 && contractChancesWhileOffline <= 100) {
-        for (let i = 0; i < contractChancesWhileOffline; ++i) {
-          if (Math.random() <= 0.25) {
-            numContracts++;
-          }
-        }
-      }
-      for (let i = 0; i < numContracts; i++) {
-        generateRandomContract();
-      }
+      // Generate bonus CCTs
+      tryGeneratingRandomContract(timeOffline / CONSTANTS.MillisecondsPerTenMinutes);
 
       let offlineReputation = 0;
       const offlineHackingIncome =
@@ -404,6 +393,24 @@ const Engine: {
       // Start interactive tutorial
       iTutorialStart();
     }
+
+    // Expose internal objects/functions in the dev build
+    if (process.env.NODE_ENV === "development") {
+      globalThis.Bitburner = {
+        // Most data is in this object
+        Player: Player,
+        // Manipulate data of servers
+        GetAllServers: GetAllServers,
+        // Manipulate data of Factions and Companies
+        Factions: Factions,
+        Companies: Companies,
+        // saveObject and loadGame can be used to create a custom save/load tool
+        SaveObject: {
+          saveObject: saveObject,
+          loadGame: loadGame,
+        },
+      };
+    }
   },
 
   start: function () {
@@ -411,9 +418,6 @@ const Engine: {
     const _thisUpdate = new Date().getTime();
     let diff = _thisUpdate - Engine._lastUpdate;
     if (diff < 0) {
-      if (Math.abs(diff) > thresholdOfTimeDiffForShowingWarningAboutSystemClock) {
-        showWarningAboutSystemClock(diff);
-      }
       diff = 0;
       Engine._lastUpdate = _thisUpdate;
       Player.lastUpdate = _thisUpdate;
@@ -428,6 +432,11 @@ const Engine: {
       Engine._lastUpdate = _thisUpdate - offset;
       Player.lastUpdate = _thisUpdate - offset;
       Engine.updateGame(diff);
+      if (GameCycleEvents.hasSubscibers()) {
+        ReactDOM.unstable_batchedUpdates(() => {
+          GameCycleEvents.emit();
+        });
+      }
     }
     window.setTimeout(Engine.start, CONSTANTS.MilliPerCycle - offset);
   },

@@ -2,7 +2,7 @@ import type { Bladeburner } from "../Bladeburner";
 import type { Action } from "../Types";
 
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { CopyableText } from "../../ui/React/CopyableText";
 import { createProgressBarText } from "../../utils/helpers/createProgressBarText";
 import { StartButton } from "./StartButton";
@@ -13,6 +13,8 @@ import { formatNumberNoSuffix } from "../../ui/formatNumber";
 import { BlackOperation, Operation } from "../Actions";
 import { BladeburnerConstants } from "../data/Constants";
 import { convertTimeMsToTimeElapsedString } from "../../utils/StringHelperFunctions";
+import WarningIcon from "@mui/icons-material/Warning";
+import { Settings } from "../../Settings/Settings";
 
 interface ActionHeaderProps {
   bladeburner: Bladeburner;
@@ -27,10 +29,11 @@ export function ActionHeader({ bladeburner, action, rerender }: ActionHeaderProp
     bladeburner.actionTimeToComplete,
   );
   const remainingSeconds = Math.max(
-    bladeburner.actionTimeToComplete - bladeburner.actionTimeCurrent + bladeburner.actionTimeOverflow,
+    bladeburner.actionTimeToComplete - bladeburner.actionTimeCurrent - bladeburner.actionTimeOverflow,
     0,
   );
-  const remainingBonusSeconds = Math.floor(bladeburner.storedCycles / BladeburnerConstants.CyclesPerSecond);
+  const remainingBonusSeconds = bladeburner.storedCycles / BladeburnerConstants.CyclesPerSecond;
+  const showMilliseconds = remainingBonusSeconds > 4;
   /**
    * Bladeburner is processed every second. Each time it's processed, we use (up to) 4 bonus seconds and process it as
    * if (up to) 5 seconds passed.
@@ -41,7 +44,7 @@ export function ActionHeader({ bladeburner, action, rerender }: ActionHeaderProp
   let eta;
   if (remainingSeconds <= effectiveBonusSeconds) {
     // If we have enough effectiveBonusSeconds, ETA is (remainingSeconds / 5).
-    eta = Math.floor(remainingSeconds / 5);
+    eta = remainingSeconds / 5;
   } else {
     /**
      * For example, let's say we start the "Training" action with 20 bonus seconds: remainingSeconds=30;remainingBonusSeconds=20.
@@ -75,7 +78,9 @@ export function ActionHeader({ bladeburner, action, rerender }: ActionHeaderProp
               progress: computedActionTimeCurrent / bladeburner.actionTimeToComplete,
             })}
           </Typography>
-          <Typography marginLeft="1rem">Remaining time: {convertTimeMsToTimeElapsedString(eta * 1000)}</Typography>
+          <Typography marginLeft="1rem">
+            Remaining time: {convertTimeMsToTimeElapsedString(eta * 1000, showMilliseconds)}
+          </Typography>
         </Box>
       </>
     );
@@ -84,6 +89,13 @@ export function ActionHeader({ bladeburner, action, rerender }: ActionHeaderProp
   return (
     <Box display="flex" flexDirection="row" alignItems="center">
       <CopyableText value={action.name} />
+      {action.warning && (
+        <Tooltip title={action.warning} sx={{ marginLeft: "10px" }}>
+          <Typography color={Settings.theme.warning}>
+            <WarningIcon />
+          </Typography>
+        </Tooltip>
+      )}
       <StartButton bladeburner={bladeburner} action={action} rerender={rerender} />
       {allowTeam && <TeamSizeButton bladeburner={bladeburner} action={action} />}
     </Box>
