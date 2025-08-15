@@ -101,7 +101,7 @@ export function capitalizeEachWord(s: string): string {
 }
 
 export function getKeyFromReactElements(a: string | React.JSX.Element, b: string | React.JSX.Element): string {
-  const keyOfA = typeof a === "string" ? a : a.key ?? "";
-  const keyOfb = typeof b === "string" ? b : b.key ?? "";
+  const keyOfA = typeof a === "string" ? a : (a.key ?? "");
+  const keyOfb = typeof b === "string" ? b : (b.key ?? "");
   return keyOfA + keyOfb;
 }

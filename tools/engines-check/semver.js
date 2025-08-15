@@ -82,9 +82,8 @@ src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-][a-zA-Z0-9-]*";
 // ## Main Version
 // Three dot-separated numeric identifiers.
 src[MAINVERSION] = `(${src[NUMERICIDENTIFIER]})\\.(${src[NUMERICIDENTIFIER]})\\.(${src[NUMERICIDENTIFIER]})`;
-src[
-  MAINVERSIONLOOSE
-] = `(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})`;
+src[MAINVERSIONLOOSE] =
+  `(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})`;
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
@@ -125,9 +124,8 @@ src[XRANGEIDENTIFIERLOOSE] = `${src[NUMERICIDENTIFIERLOOSE]}|x|X|\\*`;
 src[XRANGEIDENTIFIER] = `${src[NUMERICIDENTIFIER]}|x|X|\\*`;
 
 /* eslint-disable-next-line max-len */
-src[
-  XRANGEPLAIN
-] = `[v=\\s]*(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:${src[PRERELEASE]})?${src[BUILD]}?)?)?`;
+src[XRANGEPLAIN] =
+  `[v=\\s]*(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:${src[PRERELEASE]})?${src[BUILD]}?)?)?`;
 
 /* eslint-disable-next-line max-len */
 src[XRANGEPLAINLOOSE] =
@@ -140,9 +138,8 @@ src[XRANGELOOSE] = `^${src[GTLT]}\\s*${src[XRANGEPLAINLOOSE]}$`;
 // Coercion.
 // Extract anything that could conceivably be a part of a valid semver
 /* eslint-disable-next-line max-len */
-src[
-  COERCE
-] = `(?:^|[^\\d])(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:$|[^\\d])`;
+src[COERCE] =
+  `(?:^|[^\\d])(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:$|[^\\d])`;
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"

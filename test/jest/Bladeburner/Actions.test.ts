@@ -331,6 +331,6 @@ describe("Bladeburner Actions", () => {
   function actionIdWithIndividualStat(action: Action) {
     return Object.entries(action.weights)
       .filter(([__, value]) => value > 0)
-      .map(([stat]) => ({ id: action.id, stat } as { id: ActionIdentifier; stat: keyof Skills }));
+      .map(([stat]) => ({ id: action.id, stat }) as { id: ActionIdentifier; stat: keyof Skills });
   }
 });

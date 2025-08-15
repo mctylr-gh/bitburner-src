@@ -32,8 +32,8 @@ export function NewDivisionTab(props: IProps): React.ReactElement {
     corp.divisions.size >= corp.maxDivisions
       ? "Corporation already has the maximum number of divisions"
       : corp.funds < data.startingCost
-      ? "Insufficient corporation funds"
-      : "";
+        ? "Insufficient corporation funds"
+        : "";
 
   function newDivision(): void {
     if (disabledText) return;

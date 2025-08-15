@@ -1124,20 +1124,16 @@ NETSCRIPT API:
   of completion times for hack, grow, and weaken. Since this is an experimental change, be prepared for a possible API break next patch if you use this functionality. (@d0sboots)
 
 - Corporation API:
-
   - Fix bugs with ns.corporation.setAutoJobAssignment. (@zerbosh and @croy)
 
 - Formulas API:
-
   - Added ns.formulas.hacking.growThreads function (@d0sboots)
 
 - Sleeve API:
-
   - ns.sleeve.getTask now also includes cyclesWorked for the task types where this applies. (@Zelow79)
   - Added ns.sleeve.setToIdle function (@Zelow79)
 
 - Unsupported API:
-
   - Added ns.printRaw - allows printing custom React content to script logs. Use at your own risk, misuse is very likely to cause a crash. (@d0sboots)
 
 ELECTRON (STEAM) VERSION:
@@ -1223,7 +1219,6 @@ BREAKING API CHANGES:
 
 - ns.getPlayer no longer provides properties tor, inBladeburner, or hasCorporation. This information can be looked up using standlone functions: ns.hasTorRouter(), ns.bladeburner.inBladeburner(), ns.corporation.hasCorporation().
 - Removed many functions, with replacement ways to get the same info.
-
   - getServerRam: use getServerMaxRam and getServerUsedRam instead.
   - corporation.assignJob: use setAutoJobAssignment instead.
   - corporation.getEmployee: No longer available (employees are not individual objects).

@@ -40,8 +40,8 @@ function StyleField<T extends keyof React.CSSProperties>({
     const errorText = !newValue
       ? "Must have a value"
       : type === "number" && Number.isNaN(Number(newValue))
-      ? "Must be a number"
-      : "";
+        ? "Must be a number"
+        : "";
     setFieldValue(newValue);
     setErrorText(errorText);
     onChange(newValue, errorText);

@@ -358,8 +358,8 @@ export function DivisionOffice(props: OfficeProps): React.ReactElement {
     corp.funds < props.office.getTeaCost()
       ? "Insufficient corporation funds"
       : props.office.teaPending
-      ? "Tea is already pending for this cycle"
-      : "";
+        ? "Tea is already pending for this cycle"
+        : "";
   const partyPending = props.office.partyMult > 1;
   const partyDisabledText =
     corp.funds < 0 ? "Insufficient corporation funds" : partyPending ? "A party is already pending for this cycle" : "";

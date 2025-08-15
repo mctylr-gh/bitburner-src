@@ -67,11 +67,11 @@ export function GoPoint({
     emptyPointOwner === GoColor.white
       ? classes.libertyWhite
       : emptyPointOwner === GoColor.black
-      ? classes.libertyBlack
-      : "";
+        ? classes.libertyBlack
+        : "";
 
   const highlightClass: string = pointHighlight?.color
-    ? colorClasses[pointHighlight.color as keyof typeof colorClasses] ?? ""
+    ? (colorClasses[pointHighlight.color as keyof typeof colorClasses] ?? "")
     : "";
   const rawColorStyle = !highlightClass && pointHighlight?.color ? `${pointHighlight.color}` : "";
   const outlineWidth = rawColorStyle ? "2px" : "1px";

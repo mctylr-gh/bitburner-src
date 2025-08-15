@@ -70,8 +70,8 @@ export function validateMove(error: (s: string) => never, x: number, y: number, 
         methodName === "removeRouter"
           ? "clear this point with removeRouter()"
           : methodName === "destroyNode"
-          ? "destroy the node. (Attempted to destroyNode)"
-          : "place a router there"
+            ? "destroy the node. (Attempted to destroyNode)"
+            : "place a router there"
       }.`,
     );
   }

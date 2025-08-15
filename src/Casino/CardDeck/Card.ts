@@ -8,7 +8,10 @@ export enum Suit {
 }
 
 export class Card {
-  constructor(readonly value: number, readonly suit: Suit) {
+  constructor(
+    readonly value: number,
+    readonly suit: Suit,
+  ) {
     if (value < 1 || value > 13) {
       throw new Error(`Card instantiated with improper value: ${value}`);
     }

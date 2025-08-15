@@ -1237,7 +1237,6 @@
 ## v0.47.1 - 6/27/2019
 
 - Stock Market changes:
-
   - Transactions no longer influence stock prices (but they still influence forecast)
   - Changed the way stocks behave, particularly with regard to how the stock forecast occasionally "flips"
   - Hacking & growing a server can potentially affect the way the corresponding stock's forecast changes
@@ -1253,7 +1252,6 @@
 ## v0.47.0 - 5/17/2019
 
 - Stock Market changes:
-
   - Implemented spread. Stock's now have bid and ask prices at which transactions occur
   - Large transactions will now influence a stock's price and forecast
   - This "influencing" can take effect in the middle of a transaction
@@ -1262,7 +1260,6 @@
   - Added getStockPurchaseCost(), getStockSaleGain() Netscript functions to the TIX API
 
 - Re-sleeves can no longer have the NeuroFlux Governor augmentation
-
   - This is just a temporary patch until the mechanic gets re-worked
 
 - hack(), grow(), and weaken() functions now take optional arguments for number of threads to use (by MasonD)
@@ -1309,11 +1306,9 @@
 ## v0.46.2 - 4/14/2019
 
 - Source-File 2 now allows you to form gangs in other BitNodes when your karma reaches a very large negative value
-
   - (Karma is a hidden stat and is lowered by committing crimes)
 
 - Gang changes:
-
   - Bug Fix: Gangs can no longer clash with themselve
   - Bug Fix: Winning against another gang should properly reduce their power
 
@@ -1344,7 +1339,6 @@
 - In Bladeburner, stamina gained from Hyperbolic Regeneration Chamber is now a percentage of your max stamina
 
 - Corporation Changes:
-
   - 'Demand' value of products decreases more slowly
   - Bug Fix: Fixed a Corporation issue that broke the Market-TA2 Research
   - Bug Fix: Issuing New Shares now works properly
@@ -1362,7 +1356,6 @@
 ## v0.45.0 - 3/22/2019
 
 - Corporation changes:
-
   - Decreased the time of a full market cycle from 15 seconds to 10 seconds.
   - This means that each Corporation 'state' will now only take 2 seconds, rather than 3
   - Increased initial salaries for newly-hired employees
@@ -1392,7 +1385,6 @@
 ## v0.44.1 - 3/4/2019
 
 - Duplicate Sleeve changes:
-
   - You can now purchase Augmentations for your Duplicate Sleeves
   - Sleeves are now assigned to Shock Recovery task by default
   - Shock Recovery and Synchronize tasks are now twice as effective
@@ -1444,7 +1436,6 @@
 ## v0.43.1 - 2/11/2019
 
 - Terminal changes:
-
   - Quoted arguments are now properly parsed. (e.g. 'run f.script "this is one argument"' will be correctly parsed)
   - Errors are now shown in red text
   - 'unalias' command now has a different format and no longer needs the quotations
@@ -1468,18 +1459,15 @@
 - Added BitNode-10: Digital Carbon
 
 - Stock Market Changes:
-
   - Each stock now has a maximum number of shares you can purchase (both Long and Short positions combined)
   - Added getStockMaxShares() Netscript function to the TIX API
   - The cost of 4S Market Data TIX API Access increased from \$20b to \$25b
 
 - Job Changes:
-
   - You can now hold multiple jobs at once. This means you no longer lose reputation when leaving a company
   - Because of this change, the getCharacterInformation() Netscript function returns a slightly different value
 
 - Script Editor Changes:
-
   - Added new script editor: CodeMirror. You can choose between the old editor (Ace) or CodeMirror
   - Navigation keyboard shortcuts no longer work if the script editor is focused
 
@@ -1492,7 +1480,6 @@
 ## v0.42.0 - 1/8/2019
 
 - Corporation Changes:
-
   - Corporation can now be self-funded with \$150b or using seed money in exchange for 500m newly-issued shares
   - In BitNode-3, you no longer start with \$150b
   - Changed initial market prices for many materials
@@ -1529,12 +1516,10 @@
 ## v0.41.2 - 11/23/2018
 
 - IMPORTANT - Netscript Changes:
-
   - rm() now takes an optional parameter that lets you specify on which server to delete the file
   - Added growthAnalyze() Netscript function
 
 - Gang Changes:
-
   - UI now displays your chance to win a clash with other gangs
   - Added getChanceToWinClash() function to the Gang API
   - Added getEquipmentType() function to the Gang API
@@ -1558,14 +1543,12 @@
 ## v0.41.1 - 11/5/2018
 
 - IMPORTANT - Netscript Changes:
-
   - purchaseTor() now returns true if you already have a TOR router (it used to return false)
   - getPurchasedServerCost() now returns Infinity if the specified RAM is an invalid amount or is greater than the max amount of RAM (2 ^ 20 GB)
   - Added purchase4SMarketData() and purchase4SMarketDataTixApi() functions
   - getScriptLogs() now takes in optional arguments that let you get the logs of another script
 
 - Stock Market changes:
-
   - Stocks now have "maximum prices". These are hidden from the player
   - If a stock reaches its "maximum price", it will most likely drop in value (although it might still rise)
   - Each stock has its own, unique maximum price

@@ -13,20 +13,20 @@ export const Page = { ...SimplePage, ...ComplexPage };
 export type PageContext<T extends Page> = T extends ComplexPage.BitVerse
   ? { flume: boolean; quick: boolean }
   : T extends ComplexPage.Infiltration
-  ? { location: Location }
-  : T extends ComplexPage.Faction
-  ? { faction: Faction }
-  : T extends ComplexPage.FactionAugmentations
-  ? { faction: Faction }
-  : T extends ComplexPage.ScriptEditor
-  ? { files?: Map<ScriptFilePath | TextFilePath, string>; options?: ScriptEditorRouteOptions }
-  : T extends ComplexPage.Location
-  ? { location: Location }
-  : T extends ComplexPage.ImportSave
-  ? { saveData: SaveData; automatic?: boolean }
-  : T extends ComplexPage.Documentation
-  ? { docPage?: string }
-  : never;
+    ? { location: Location }
+    : T extends ComplexPage.Faction
+      ? { faction: Faction }
+      : T extends ComplexPage.FactionAugmentations
+        ? { faction: Faction }
+        : T extends ComplexPage.ScriptEditor
+          ? { files?: Map<ScriptFilePath | TextFilePath, string>; options?: ScriptEditorRouteOptions }
+          : T extends ComplexPage.Location
+            ? { location: Location }
+            : T extends ComplexPage.ImportSave
+              ? { saveData: SaveData; automatic?: boolean }
+              : T extends ComplexPage.Documentation
+                ? { docPage?: string }
+                : never;
 
 export type PageWithContext =
   | ({ page: ComplexPage.BitVerse } & PageContext<ComplexPage.BitVerse>)

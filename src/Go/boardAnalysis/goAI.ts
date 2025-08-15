@@ -820,13 +820,13 @@ function getMoveOptions(boardState: BoardState, player: GoColor, rng: number, sm
         ? defendMove
         : null;
     },
-    eyeMove: () => (endGameAvailable ? null : getEyeCreationMove(board, player, availableSpaces) ?? null),
-    eyeBlock: () => (endGameAvailable ? null : getEyeBlockingMove(board, player, availableSpaces) ?? null),
+    eyeMove: () => (endGameAvailable ? null : (getEyeCreationMove(board, player, availableSpaces) ?? null)),
+    eyeBlock: () => (endGameAvailable ? null : (getEyeBlockingMove(board, player, availableSpaces) ?? null)),
     pattern: async () => {
       const point = endGameAvailable ? null : await findAnyMatchedPatterns(board, player, availableSpaces, smart, rng);
       return point ? { point } : null;
     },
-    growth: () => (endGameAvailable ? null : getGrowthMove(board, player, availableSpaces, rng) ?? null),
+    growth: () => (endGameAvailable ? null : (getGrowthMove(board, player, availableSpaces, rng) ?? null)),
     expansion: () => getExpansionMove(board, availableSpaces, rng, expansionMoves) ?? null,
     jump: () => getJumpMove(board, player, availableSpaces, rng, expansionMoves) ?? null,
     defend: () => getDefendMove(board, player, availableSpaces) ?? null,

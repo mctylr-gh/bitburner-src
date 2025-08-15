@@ -30,8 +30,8 @@ export function GoPublicModal(props: IProps): React.ReactElement {
     shares >= corp.numShares
       ? "Cannot issue this many shares"
       : shares !== 0 && !isPositiveInteger(shares)
-      ? "Must issue an non-negative integer number of shares"
-      : "";
+        ? "Must issue an non-negative integer number of shares"
+        : "";
 
   function goPublic(): void {
     if (disabledText) return;

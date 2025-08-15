@@ -278,7 +278,7 @@ const processScript = (rules: IRule[], script: Script) => {
   for (let i = 0; i < lines.length; i++) {
     for (const rule of rules) {
       const line = lines[i];
-      const match = isLegacyScript(script.filename) ? rule.matchScript ?? rule.matchJS : rule.matchJS;
+      const match = isLegacyScript(script.filename) ? (rule.matchScript ?? rule.matchJS) : rule.matchJS;
       if (line.match(match)) {
         rule.offenders.push({
           file: script.filename,

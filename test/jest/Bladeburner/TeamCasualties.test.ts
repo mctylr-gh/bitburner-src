@@ -46,7 +46,7 @@ describe("Bladeburner Team", () => {
 
   describe("Operations", () => {
     it("hav a chance of zero deaths for Operations", () => {
-      teamSize(10), startAction(OP), teamUsed(10), forceMinCasualties();
+      (teamSize(10), startAction(OP), teamUsed(10), forceMinCasualties());
       actionFails();
       expect(inst.teamSize).toBe(10);
     });
@@ -54,7 +54,7 @@ describe("Bladeburner Team", () => {
 
   describe("Black Operations", () => {
     it("always have at least 1 death", () => {
-      teamSize(10), startAction(BLACK_OP), teamUsed(10), forceMinCasualties();
+      (teamSize(10), startAction(BLACK_OP), teamUsed(10), forceMinCasualties());
       actionFails();
       expect(inst.teamSize).toBe(9);
     });
@@ -65,7 +65,7 @@ describe("Bladeburner Team", () => {
       ["success", actionSucceeds],
       ["fail", actionFails],
     ])("remains unchanged at all rates: %s", (_: string, attempt: CallableFunction) => {
-      teamSize(1000), startAction(OP), teamUsed(0);
+      (teamSize(1000), startAction(OP), teamUsed(0));
       attempt();
       expect(inst.teamSize).toBe(1000);
     });
@@ -73,7 +73,7 @@ describe("Bladeburner Team", () => {
 
   describe("Human members", () => {
     it("get killed according to roll", () => {
-      teamSize(15), startAction(OP), teamUsed(15), forceMaxCasualties(), actionSucceeds();
+      (teamSize(15), startAction(OP), teamUsed(15), forceMaxCasualties(), actionSucceeds());
       expect(inst).toMatchObject({ teamSize: 7, teamLost: 8 });
     });
   });
@@ -82,14 +82,14 @@ describe("Bladeburner Team", () => {
     it("get killed with human casualties before sleeves", () => {
       /** At most 10 + 8 -> 9 casualties occur at worst,
        * killing human team members before sleeves */
-      teamSize(10), startAction(BLACK_OP), supportingSleeves(8), teamUsed(18);
+      (teamSize(10), startAction(BLACK_OP), supportingSleeves(8), teamUsed(18));
       actionSucceeds();
       expect(inst.teamSize).toBeLessThanOrEqual(18);
       assertNoShockIncrease();
     });
 
     it("shocks sleeves when deaths exceed humans", () => {
-      teamSize(0), startAction(OP), supportingSleeves(8), forceMaxCasualties(), teamUsed(8);
+      (teamSize(0), startAction(OP), supportingSleeves(8), forceMaxCasualties(), teamUsed(8));
       actionFails();
       assertSleevesHaveBeenShocked();
     });
@@ -99,7 +99,7 @@ describe("Bladeburner Team", () => {
     it.each([[OP], [BLACK_OP]])(
       "no change in team size when not using team. Action: %s",
       (op: ActionIdFor<BlackOperation> | ActionIdFor<Operation>) => {
-        teamSize(0), supportingSleeves(3), startAction(op), teamUsed(0), actionFails();
+        (teamSize(0), supportingSleeves(3), startAction(op), teamUsed(0), actionFails());
         expect(inst.teamSize).toBe(3);
         expect(inst.teamLost).toBe(0);
       },
@@ -115,18 +115,18 @@ describe("Bladeburner Team", () => {
     it.each([[OP], [BLACK_OP]])(
       "will occur on actions that support teams: %s",
       (op: ActionIdFor<BlackOperation> | ActionIdFor<Operation>) => {
-        teamSize(5), startAction(op), forceMaxCasualties(), teamUsed(5), actionFails();
+        (teamSize(5), startAction(op), forceMaxCasualties(), teamUsed(5), actionFails());
         expect(inst.teamSize).toBe(0);
       },
     );
 
     it("are potentially entire team when failing", () => {
-      teamSize(5), startAction(OP), forceMaxCasualties(), teamUsed(5), actionFails();
+      (teamSize(5), startAction(OP), forceMaxCasualties(), teamUsed(5), actionFails());
       expect(inst).toMatchObject({ teamSize: 0, teamLost: 5 });
     });
 
     it("at worst half the team when succeeding (rounding up)", () => {
-      teamSize(5), startAction(OP), forceMaxCasualties(), teamUsed(5), actionSucceeds();
+      (teamSize(5), startAction(OP), forceMaxCasualties(), teamUsed(5), actionSucceeds());
       expect(inst).toMatchObject({ teamSize: 2, teamLost: 3 });
     });
   });

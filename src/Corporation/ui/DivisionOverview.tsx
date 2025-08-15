@@ -74,8 +74,8 @@ function MakeProductButton(): React.ReactElement {
   const disabledText = hasMaxProducts
     ? `${division.name} already has the maximum number of products (${division.maxProducts})`
     : corp.funds < 0
-    ? "Insufficient corporation funds"
-    : "";
+      ? "Insufficient corporation funds"
+      : "";
 
   return (
     <>
