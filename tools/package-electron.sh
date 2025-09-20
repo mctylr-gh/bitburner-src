@@ -19,9 +19,9 @@ cd ..
 if [ -d .app ]; then
   cp -r .app/* .package || exit 2
 else
-  echo "Need to build app first. npm run build" && exit 1
+  echo "Need to build app first. 'npm run build'" && exit 1
 fi
-cp -r electron/* .package
+cp -r electron/* .package || exit 2
 
 packageWin() {
   eval "$(package win32 x64,arm64 .package/icon.ico)"
@@ -33,7 +33,7 @@ packageLinux() {
 
 packageMac() {
   UNI_ARGS='--osx-universal.x64ArchFiles="Contents/Resources/app/node_modules/@catloversg/steamworks.js/dist/osx/*" '
-  eval "$(package darwin arm64,x64 .package/icon) ${UNI_ARGS}"
+  eval "$(package darwin,mas arm64,x64,universal .package/icon) ${UNI_ARGS}"
 }
 
 package() {
@@ -66,4 +66,4 @@ case $BUILD_PLATFORM in
 esac
 
 # Cleanup temporary files
-## rm -rf .package
+rm -rf .package
