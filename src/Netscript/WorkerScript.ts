@@ -12,7 +12,6 @@ import type { NSFull } from "../NetscriptFunctions";
 import type { ScriptFilePath } from "../Paths/ScriptFilePath";
 import type { RunningScript } from "../Script/RunningScript";
 import type { Script } from "../Script/Script";
-import type { ScriptArg } from "@nsdefs";
 import type { ScriptDeath } from "./ScriptDeath";
 
 import { Environment } from "./Environment";
@@ -20,9 +19,6 @@ import { RamCostConstants } from "./RamCostGenerator";
 import { GetServer } from "../Server/AllServers";
 
 export class WorkerScript {
-  /** Script's arguments */
-  args: ScriptArg[];
-
   /**
    * Holds the timeoutID (numeric value) for whenever this script is blocked by a
    * timed Netscript function. i.e. Holds the return value of setTimeout()
@@ -48,12 +44,6 @@ export class WorkerScript {
   /** Netscript Environment for this script */
   env: Environment;
 
-  /**
-   * Used for static RAM calculation. Stores names of all functions that have
-   * already been checked by this script
-   */
-  loadedFns: Record<string, boolean> = {};
-
   /** Filename of script */
   name: ScriptFilePath;
 
@@ -72,8 +62,8 @@ export class WorkerScript {
   /** hostname on which this script is running */
   hostname: string;
 
-  /**Map of functions called when the script ends. */
-  atExit: Map<string, () => void> = new Map();
+  /** Map of functions called when the script ends. Allocated lazily on the first ns.atExit call. */
+  atExit: Map<string, () => void> | null = null;
 
   constructor(runningScriptObj: RunningScript, pid: number, nsFuncsGenerator?: (ws: WorkerScript) => NSFull) {
     this.name = runningScriptObj.filename;
@@ -96,7 +86,6 @@ export class WorkerScript {
       throw new Error(`WorkerScript constructed with invalid script filename: ${this.name}`);
     }
     this.scriptRef = runningScriptObj;
-    this.args = runningScriptObj.args.slice();
     this.env = new Environment();
     if (typeof nsFuncsGenerator === "function") {
       this.env.vars = nsFuncsGenerator(this);
